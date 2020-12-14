@@ -39,7 +39,7 @@ namespace ConsoleApp1
 
             
 
-            ITariffSwollenEar tarif1 = samsung.SimCard;
+            ITarifSwollenEar tarif1 = samsung.SimCard;
             tarif1.PaymentOfTariff(client1, tarif1); //оплата первого тарифа
 
             ITarifTiredTongue tarif2 = IPhone11.SimCard;

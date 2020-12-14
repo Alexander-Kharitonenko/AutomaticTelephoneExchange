@@ -12,7 +12,7 @@ namespace ConsoleApp1
     public delegate void MessageHandler(object o, MobileProviderEventArgs e); //делегат обработки 
 
 
-    public class MobileProvider  : ConnectionPort, ITariffSwollenEar, ITarifTiredTongue //предоставляет порты для подключения , выдаёт кажому клиенту номер , заключить договор
+    public class MobileProvider  : ConnectionPort, ITarifSwollenEar, ITarifTiredTongue //предоставляет порты для подключения , выдаёт кажому клиенту номер , заключить договор
     {
         
 
@@ -95,7 +95,7 @@ namespace ConsoleApp1
 
         // ТАРИФНЫЕ ПЛАНЫ
 
-        uint ITariffSwollenEar.СostMinutes(Client client) // стоимость тариф за месяц
+        uint ITarifSwollenEar.СostMinutes(Client client) // стоимость тариф за месяц
         {
             uint result = 0;
             if (client != null)
@@ -134,7 +134,7 @@ namespace ConsoleApp1
             return result;
         }
 
-        void ITariffSwollenEar.PaymentOfTariff(Client client, ITariffSwollenEar tariff)//оплата тарифа
+        void ITarifSwollenEar.PaymentOfTariff(Client client, ITarifSwollenEar tariff)//оплата тарифа
         {
 
             uint prise = tariff.СostMinutes(client);
