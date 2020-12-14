@@ -9,8 +9,7 @@ namespace ConsoleApp1
     
      public delegate void MessageHandlerPhone(object o , MobileProviderEventArgs e); //делегат обработки событий
 
-   public class Phone<T> : ITariffSwollenEar, ITiredTongue
-                 where T : MobileProvider  
+   public class Phone<T> where T : MobileProvider  
     {
        
 
@@ -29,13 +28,10 @@ namespace ConsoleApp1
 
         Dictionary<Client, ulong> Contacts = new Dictionary<Client, ulong>();
 
-        List<(uint, string)> InformationCall = new List<(uint, string)>();
-
-
         public event MessageHandlerPhone Notify;
 
 
-
+         
 
         public void AddContacts(Client client) // добавичь человека в список контактов каждый человек соответствует определённому номеру
         {
@@ -90,8 +86,6 @@ namespace ConsoleApp1
             }
             Contacts.OrderBy(i => i.Key.Name);
         }
-
-      
 
         public void Call1 (Client Contact ) 
         {
@@ -152,158 +146,22 @@ namespace ConsoleApp1
 
         }
 
-
-
-
-
-        // ТАРИФНЫЕ ПЛАНЫ
-
-        uint ITariffSwollenEar.СostMinutes(Client client) // стоимость тариф за месяц
-        {
-            uint result = 0;
-            if (client != null)
-            {
-                for (int i = 0; i < 30; i++)
-                {
-                    InformationCall.Add(SimCard.CallDateTime());
-
-                }
-                InformationCall.OrderBy(i => i.Item1);
-            }
-            else 
-            {
-
-                Notify?.Invoke(this, new MobileProviderEventArgs("Specify a client"));
-                
-            }
-
-            if (client != null)
-            {
-                for (int i = 0; i < 30; i++)
-                {
-                    result += InformationCall[i].Item1;
-                }
-
-                result *= 4;
-            }
-            else
-            {
-
-                Notify?.Invoke(this, new MobileProviderEventArgs("Specify a client"));
-
-            }
-
-            Console.WriteLine($"{client.Name} cost of calls per month - {result}P");
-            return result;
-        }
-
-        void ITariffSwollenEar.PaymentOfTariff(Client client , ITariffSwollenEar tariff)//оплата тарифа
-        {
-
-            uint prise = tariff.СostMinutes(client);
-            if (prise != 0) 
-            {
-                Console.WriteLine($"cost of calls equally {prise} want to pay Y - Yes N - No ?");
-                string Key = Console.ReadLine();
-                try
-                {
-                    if (Key == "Y")
-                    {
-                        prise = 0;
-                        Console.WriteLine("calls payment");
-
-                    }
-                    else if (Key == "N")
-                    {
-                        Console.WriteLine($"you refused to pay calls you owe a debt {prise}P");
-                    }
-                }
-                catch (Exception e) 
-                {
-                    Console.WriteLine(e.Message);
-                }
-
-            }
-
-        }
-
-
-        uint ITiredTongue.СostMinutes(Client client) // стоимость тариф за месяц
-        {
-            uint result = 0;
-            if (client != null)
-            {
-                for (int i = 0; i < 30; i++)
-                {
-                    InformationCall.Add(SimCard.CallDateTime());
-
-                }
-                InformationCall.OrderBy(i => i.Item1);
-            }
-            else
-            {
-
-                Notify?.Invoke(this, new MobileProviderEventArgs("Specify a client"));
-
-            }
-
-            if (client != null)
-            {
-                for (int i = 0; i < 30; i++)
-                {
-                    result += InformationCall[i].Item1;
-                }
-
-                result *= 2;
-            }
-            else
-            {
-
-                Notify?.Invoke(this, new MobileProviderEventArgs("Specify a client"));
-
-            }
-
-            Console.WriteLine($"{client.Name} cost of calls per month - {result}P");
-            return result;
-        }
-
-        void ITiredTongue.PaymentOfTariff(Client client, ITiredTongue tariff)//оплата тарифа
-        {
-
-            uint prise = tariff.СostMinutes(client);
-            if (prise != 0)
-            {
-                Console.WriteLine($"cost of calls equally {prise} want to pay Y - Yes N - No ?");
-                string Key = Console.ReadLine();
-                try
-                {
-                    if (Key == "Y")
-                    {
-                        prise = 0;
-                        Console.WriteLine("calls payment");
-
-                    }
-                    else if (Key == "N")
-                    {
-                        Console.WriteLine($"you refused to pay calls you owe a debt {prise}P");
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.Message);
-                }
-
-            }
-
-        }
+ 
 
         public void GetAllCalls(Client client)
         {
             
-            foreach (var i in InformationCall)
+            foreach (var i in SimCard.InformationCall)
             {
                 Console.WriteLine($"{client.Name} call date { i.Item2} - duration {i.Item1} minutes ");
             }
         }
+
+        public void Message(object o, MobileProviderEventArgs e)
+        {
+            Console.WriteLine(e.Message);
+        }
     }
+
+    
 }

@@ -39,11 +39,19 @@ namespace ConsoleApp1
 
         public static void CustomerVoice(object Vote) //голос клиента
         {
-            string vote = (string)Vote;
+            try
+            {
+                string vote = (string)Vote;
                 var reader = new Mp3FileReader(vote);
                 var waveOut = new WaveOutEvent(); // or WaveOutEvent()
                 waveOut.Init(reader);
                 waveOut.Play();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            
 
         }
 
