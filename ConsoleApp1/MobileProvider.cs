@@ -7,84 +7,51 @@ using System.Threading;
 namespace ConsoleApp1
 {
 
-    public delegate ulong AssignsNumberClient();//делегат генератора номеров 
+    
 
     public delegate void MessageHandler(object o, MobileProviderEventArgs e); //делегат обработки 
 
 
-    public class MobileProvider  : ConnectionPort, ITarifSwollenEar, ITarifTiredTongue //предоставляет порты для подключения , выдаёт кажому клиенту номер , заключить договор
+    public class MobileProvider  //предоставляет порты для подключения , выдаёт кажому клиенту номер , заключить договор
     {
-        
+       public MobileProvider(AutonomousTelephoneExchange Atc, TariffPlansOne tariffOne, TariffPlansTwo tariffTwo) 
+       {
+            this.Atc = Atc;
+            this.tariffOne = tariffOne;
+            this.tariffTwo = tariffTwo;
+       }
 
-        AssignsNumberClient numberClient;
+        
 
         public event MessageHandler Notify;
 
-        private ulong Numbet { get; set; } // номер
+        public AutonomousTelephoneExchange Atc;
+
+        public TariffPlansOne tariffOne;
+
+        public TariffPlansTwo tariffTwo;
 
         
-
-        
-
-
-       public List<(uint, string)> InformationCall = new List<(uint, string)>();
-
-
-
-        private ulong GetNumber() // генератор номеров
+        public ulong GetMyNumber(Client client) 
         {
-            
-            ulong RegionТumber = 37529;
-            Random NumberGeneration = new Random();
-            Numbet = ulong.Parse(RegionТumber.ToString() + NumberGeneration.Next(1000000,8000000).ToString());
-            return Numbet;
-
+                   
+            return GetClient(client);
         }
 
 
-
-        public void SignContract(Client person) // Заключаем контракт
-        {
-            
-
-            if (Clients.All(i => i.Key.Name != person.Name & person.Age >= 18 & person != null))
-            {
-
-                numberClient += GetNumber;
-                Clients.Add(person, numberClient());
-                Notify?.Invoke(this,new MobileProviderEventArgs($"The contract with the client has been successfully concluded"));
-
-
-            }
-            else
-            {
-                
-                Notify?.Invoke(this, new MobileProviderEventArgs($"The contract with the client has been successfully concluded"));
-
-            }
-
-           
-        }
-
-
-
-        public (bool , ulong) GetClient(Client person) // Ищим клиента в сети
+        public ulong GetClient(Client person) // Ищим клиента в сети
         {
            
-            ulong Number=0;
-            if (Clients.Any( i => i.Key == person) && person != null)
+            if (Atc.Clients.Any( i => i.Key == person) && person != null)
             {
-
-                Number = Clients[person];
-                return (true, Number);
-               
+                return Atc.Clients[person];
 
             }
             else
             {
 
                 Notify?.Invoke(this, new MobileProviderEventArgs($"No contract with this client"));
-                return (false, Number);
+                return 0;
                
 
             }
@@ -92,148 +59,16 @@ namespace ConsoleApp1
         }
 
 
-
-        // ТАРИФНЫЕ ПЛАНЫ
-
-        uint ITarifSwollenEar.СostMinutes(Client client) // стоимость тариф за месяц
-        {
-            uint result = 0;
-            if (client != null)
-            {
-                for (int i = 0; i < 30; i++)
-                {
-                    InformationCall.Add(CallDateTime());
-
-                }
-                InformationCall.OrderBy(i => i.Item1);
-            }
-            else
-            {
-
-                Notify?.Invoke(this, new MobileProviderEventArgs("Specify a client"));
-
-            }
-
-            if (client != null)
-            {
-                for (int i = 0; i < 30; i++)
-                {
-                    result += InformationCall[i].Item1;
-                }
-
-                result *= 4;
-            }
-            else
-            {
-
-                Notify?.Invoke(this, new MobileProviderEventArgs("Specify a client"));
-
-            }
-
-            Console.WriteLine($"{client.Name} cost of calls per month - {result}P");
-            return result;
-        }
-
-        void ITarifSwollenEar.PaymentOfTariff(Client client, ITarifSwollenEar tariff)//оплата тарифа
+        public void Port(Client client1, Client client2) // порт соединения и разговора клиентов
         {
 
-            uint prise = tariff.СostMinutes(client);
-            if (prise != 0)
-            {
-                Console.WriteLine($"cost of calls equally {prise} want to pay Y - Yes N - No ?");
-                string Key = Console.ReadLine();
-                try
-                {
-                    if (Key == "Y")
-                    {
-                        prise = 0;
-                        Console.WriteLine("calls payment");
-
-                    }
-                    else if (Key == "N")
-                    {
-                        Console.WriteLine($"you refused to pay calls you owe a debt {prise}P");
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.Message);
-                }
-
-            }
+            
 
         }
 
-
-        uint ITarifTiredTongue.СostMinutes(Client client) // стоимость тариф за месяц
+        public void Message(object o, MobileProviderEventArgs e)
         {
-            uint result = 0;
-            if (client != null)
-            {
-                for (int i = 0; i < 30; i++)
-                {
-                    InformationCall.Add(CallDateTime());
-
-                }
-                InformationCall.OrderBy(i => i.Item1);
-            }
-            else
-            {
-
-                Notify?.Invoke(this, new MobileProviderEventArgs("Specify a client"));
-
-            }
-
-            if (client != null)
-            {
-                for (int i = 0; i < 30; i++)
-                {
-                    result += InformationCall[i].Item1;
-                }
-
-                result *= 2;
-            }
-            else
-            {
-
-                Notify?.Invoke(this, new MobileProviderEventArgs("Specify a client"));
-
-            }
-
-            Console.WriteLine($"{client.Name} cost of calls per month - {result}P");
-            return result;
+            Console.WriteLine(e.Message);
         }
-
-        void ITarifTiredTongue.PaymentOfTariff(Client client, ITarifTiredTongue tariff)//оплата тарифа
-        {
-
-            uint prise = tariff.СostMinutes(client);
-            if (prise != 0)
-            {
-                Console.WriteLine($"cost of calls equally {prise} want to pay Y - Yes N - No ?");
-                string Key = Console.ReadLine();
-                try
-                {
-                    if (Key == "Y")
-                    {
-                        prise = 0;
-                        Console.WriteLine("calls payment");
-
-                    }
-                    else if (Key == "N")
-                    {
-                        Console.WriteLine($"you refused to pay calls you owe a debt {prise}P");
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.Message);
-                }
-
-            }
-
-
-        }
-
     }
 }

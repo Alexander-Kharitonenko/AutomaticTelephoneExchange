@@ -6,9 +6,6 @@ using System.Threading;
 
 namespace ConsoleApp1
 {
-
-     
-
     public class Client 
     {
 
@@ -24,15 +21,15 @@ namespace ConsoleApp1
             this.Phone = phone;
             
         }
+
         public string Name;
 
         public string Surname;
 
         public byte Age;
+   
 
-       
-
-        public Phone<MobileProvider> Phone { get; set; }
+        public Phone<MobileProvider> Phone;
         
 
 

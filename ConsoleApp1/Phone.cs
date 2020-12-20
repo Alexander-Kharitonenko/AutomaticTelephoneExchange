@@ -8,41 +8,49 @@ namespace ConsoleApp1
 {
     
      public delegate void MessageHandlerPhone(object o , MobileProviderEventArgs e); //делегат обработки событий
+ 
+
 
    public class Phone<T> where T : MobileProvider  
     {
-       
 
+       
+           
         public Phone(T SimCard, bool UseSim) 
         {
             this.SimCard = SimCard;
             this.UseSim = UseSim;
+           
         }
 
         private readonly string Vote1 = @"C:\Users\Александр\Desktop\С#\Проект26 - ДЗ Делегаты\ConsoleApp1\ConsoleApp1\Data\Голос парня1.mp3";
         private readonly string Vote2 = @"C:\Users\Александр\Desktop\С#\Проект26 - ДЗ Делегаты\ConsoleApp1\ConsoleApp1\Data\Голос бабушки1.mp3";
 
+       
+
         public bool UseSim;
 
         public T SimCard;
 
-        Dictionary<Client, ulong> Contacts = new Dictionary<Client, ulong>();
+        public Dictionary<Client, ulong> ContactsInMobile = new Dictionary<Client, ulong>();
 
         public event MessageHandlerPhone Notify;
 
+        
 
-         
+
+
 
         public void AddContacts(Client client) // добавичь человека в список контактов каждый человек соответствует определённому номеру
         {
 
 
-                (bool, ulong) Resuly = SimCard.GetClient(client);
+                ulong Resuly = SimCard.GetClient(client);
 
-                if (Resuly.Item1 & Contacts.All(i => i.Value != Resuly.Item2))
+                if (ContactsInMobile.All(i => i.Value != Resuly))
                 {
-                   
-                    Contacts.Add(client, Resuly.Item2);
+
+                    ContactsInMobile.Add(client, Resuly);
                     Notify?.Invoke(this, new MobileProviderEventArgs($"{client.Name} added to your contact list ")); //Евент
                 }
                 else
@@ -56,57 +64,54 @@ namespace ConsoleApp1
         public void RemoveContacts(Client person) // удалить человека из списков контактов 
         {
   
-            if (Contacts.Any(i => i.Key.Name == person.Name & i.Key.Surname == person.Surname))
+            if (ContactsInMobile.Any(i => i.Key.Name == person.Name & i.Key.Surname == person.Surname))
             {
-                Contacts.Remove(person);
+                ContactsInMobile.Remove(person);
                
             }          
             else
             {
                 Notify?.Invoke(this, new MobileProviderEventArgs("The client does not exist"));
             }
-            Contacts.OrderBy(i => i.Key.Name);
+            ContactsInMobile.OrderBy(i => i.Key.Name);
         }
 
-        public void GetNumberAddContacts(Client client) //получить одного клиента из списка контактов или все записанные в телефоне номера
+        public ulong GetNumberContacts(Client client) //получить одного клиента из списка контактов или все записанные в телефоне номера
         {
             ulong Number;
-            if (client != null & Contacts.Any(i => i.Key.Name == client.Name))
+            if (client != null & ContactsInMobile.Any(i => i.Key.Name == client.Name))
             {
-                Number = Contacts[client];
+                Number = ContactsInMobile[client];
                 Notify?.Invoke(this, new MobileProviderEventArgs($"Name - {client.Name} Phome - {Number}"));
+                ContactsInMobile.OrderBy(i => i.Key.Name);
+                return Number;
             }
             else 
             {
+                 Number = 0;
                 Console.WriteLine($"Contact not found, here is a list of all contacts");
-                foreach (var i in Contacts) 
+                foreach (var i in ContactsInMobile) 
                 {
                     Notify?.Invoke(this, new MobileProviderEventArgs($"Name - {i.Key.Name} Phone - {i.Value}"));
                 }
+                ContactsInMobile.OrderBy(i => i.Key.Name);
+                return Number;
             }
-            Contacts.OrderBy(i => i.Key.Name);
+            
         }
 
-        public void Call1 (Client Contact ) 
+
+        public void Call (Client Contact) 
         {
 
-            (bool, ulong) Resuly = SimCard.GetClient(Contact);
+            ulong Resuly = SimCard.GetClient(Contact);
 
-            if (Resuly.Item1 && UseSim)
-            {
-                
-               
+            if (UseSim)
+            { 
                 Contact.Thread1.Start(Vote1);
                 Thread.Sleep(2000);
-
-
-
-
-
-                SimCard.CallDateTime();// длительность разговора 
-                Notify?.Invoke(this, new MobileProviderEventArgs($"Call in progress { SimCard.CallDateTime().Item2} subscriber {Contact.Name}"));
-
-
+                SimCard.Atc.CallDateTime();// длительность разговора 
+                Notify?.Invoke(this, new MobileProviderEventArgs($"Call in progress { SimCard.Atc.CallDateTime().Item2} subscriber {Contact.Name}"));
 
             }
             else
@@ -116,26 +121,18 @@ namespace ConsoleApp1
 
             
         }
+
         public void Call2(Client Contact)
         {
 
-            (bool, ulong) Resuly = SimCard.GetClient(Contact);
+            ulong Resuly = SimCard.GetClient(Contact);
 
-            if (Resuly.Item1 && UseSim)
+            if (UseSim)
             {
+                Contact.Thread1.Start(Vote2);
+                Thread.Sleep(2000);
+                SimCard.Atc.CallDateTime();// длительность разговора 
                 
-                Contact.Thread2.Start(Vote2);
-               
-               
-                
-
-
-
-
-                SimCard.CallDateTime();// длительность разговора 
-                Notify?.Invoke(this, new MobileProviderEventArgs($"Call in progress { SimCard.CallDateTime().Item2} subscriber {Contact.Name}"));
-
-
 
             }
             else
@@ -146,16 +143,6 @@ namespace ConsoleApp1
 
         }
 
- 
-
-        public void GetAllCalls(Client client)
-        {
-            
-            foreach (var i in SimCard.InformationCall)
-            {
-                Console.WriteLine($"{client.Name} call date { i.Item2} - duration {i.Item1} minutes ");
-            }
-        }
 
         public void Message(object o, MobileProviderEventArgs e)
         {

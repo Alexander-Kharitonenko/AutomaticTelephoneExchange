@@ -13,6 +13,7 @@ namespace ConsoleApp1
         {
             Message = message;
         }
+
         public string Message;
 
     }
